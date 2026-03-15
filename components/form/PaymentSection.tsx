@@ -54,10 +54,11 @@ export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'zaros_bootcamp'); // Sin firma, usando upload_preset
+        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'zaros_bootcamp');
 
         try {
-            const response = await fetch('https://api.cloudinary.com/v1_1/dlvxbk47p/image/upload', {
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dlvxbk47p';
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: 'POST',
                 body: formData,
             });
