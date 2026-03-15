@@ -1,81 +1,81 @@
-import { FormState, Recommendation } from '../types/form';
+import type { FormData } from '@/types/form'
+import type { Recomendacion } from './recomendar'
 
-export async function saveToSheets(data: FormState, recommendation: Recommendation) {
-    const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK;
-    if (!webhookUrl) {
-        console.warn("GOOGLE_SHEETS_WEBHOOK no configurada");
-        return;
+export async function guardarEnSheets(
+    data: FormData,
+    rec: Recomendacion
+): Promise<{ success: boolean; meetLink?: string; eventoId?: string }> {
+
+    const webhook = process.env.GOOGLE_SHEETS_WEBHOOK
+
+    if (!webhook) {
+        console.warn('[Sheets] GOOGLE_SHEETS_WEBHOOK no configurado')
+        return { success: false }
     }
 
     const payload = {
-        ...data,
-        bootcampRecomendado: recommendation.titulo,
-        recomendacionNivel: recommendation.nivel,
-        fechaRegistro: new Date().toISOString()
-    };
+        timestamp: new Date().toISOString(),
+        nombre: data.nombre,
+        email: data.email,
+        whatsapp: `${data.waCode} ${data.waNumero}`,
+        pais: data.pais,
+        documento: data.documento,
+        edu: data.edu,
+        laboral: data.laboral,
+        sector: data.sector,
+        bootcamp_elegido: data.bootcampElegido,
+        bootcamp_recomendado: rec.nivel,
+        bootcamp_titulo: rec.titulo,
+        fecha_reunion: data.fechaReunion ? new Date(data.fechaReunion).toISOString() : '',
+        hora_reunion: data.horaReunion,
+        cuando_pagar: data.cuandoPagar,
+        metodo_pago: data.metodoPago,
+        comprobante_pago: data.comprobantePago || '',
+        recomendo: data.recomendo,
+        mot1: data.mot1,
+        mot2: data.mot2,
+    }
+
+    console.log('[Sheets] Enviando a:', webhook)
+    console.log('[Sheets] Payload:', JSON.stringify(payload))
 
     try {
-        await fetch(webhookUrl, {
+        const response = await fetch(webhook, {
             method: 'POST',
+            redirect: 'follow',      // seguir el 302 de Apps Script
             headers: {
-                'Content-Type': 'application/json',
+                // text/plain evita el preflight CORS que bloquea application/json
+                // el JSON.parse del Apps Script igual funciona
+                'Content-Type': 'text/plain;charset=utf-8',
             },
             body: JSON.stringify(payload),
-        });
-    } catch (error) {
-        console.error("Error guardando en Google Sheets:", error);
+        })
+
+        const text = await response.text()
+        console.log('[Sheets] Respuesta HTTP status:', response.status)
+        console.log('[Sheets] Respuesta body:', text)
+
+        try {
+            const json = JSON.parse(text)
+            if (json.success) {
+                console.log('[Sheets] ✅ Guardado correctamente')
+                return {
+                    success: true,
+                    meetLink: json.meetLink || '',
+                    eventoId: json.eventoId || '',
+                }
+            } else {
+                console.error('[Sheets] ❌ Error del script:', json.error)
+                return { success: false }
+            }
+        } catch {
+            // A veces Apps Script devuelve HTML en errores de autorización
+            console.error('[Sheets] Respuesta no es JSON válido:', text.slice(0, 200))
+            return { success: false }
+        }
+
+    } catch (err) {
+        console.error('[Sheets] fetch error:', err)
+        return { success: false }
     }
 }
-
-/**
- * GOOGLE APPS SCRIPT
- * Copia y pega el código de abajo en Herramientas -> Editor de Secuencia de Comandos en tu Google Sheet.
- * Asegúrate de implementar como "Aplicación web" con acceso "Cualquiera".
- 
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  if (!e.postData || !e.postData.contents) {
-    return ContentService.createTextOutput(JSON.stringify({"success": false, "error": "No data"}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  var data = JSON.parse(e.postData.contents);
-  
-  // Agregar un header si la hoja está vacía (opcional)
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Fecha Registro", "Nombre", "Email", "WhatsApp", "Código País", "País", "Documento",
-      "Educación", "Sector", "Laboral", "Bootcamp Elegido", "Bootcamp Recomendado",
-      "Nivel Recomendado", "Fecha Reunión", "Hora Reunión", "Motivación 1", "Motivación 2",
-      "Certificado", "Privacidad"
-    ]);
-  }
-  
-  sheet.appendRow([
-    data.fechaRegistro,
-    data.nombre,
-    data.email,
-    data.whatsapp,
-    data.codigoPais,
-    data.pais,
-    data.documento,
-    data.educacion,
-    data.sector,
-    data.laboral,
-    data.bootcampElegido,
-    data.bootcampRecomendado,
-    data.recomendacionNivel,
-    data.fechaReunion,
-    data.horaReunion,
-    data.mot1,
-    data.mot2,
-    data.certificado ? "Sí" : "No",
-    data.privacidad ? "Sí" : "No"
-  ]);
-  
-  return ContentService.createTextOutput(JSON.stringify({"success": true}))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
- */

@@ -1,34 +1,69 @@
-export interface FormState {
-    // Step 1
+export type NivelBootcamp = 'nivel1' | 'nivel2' | 'nivel3';
+export type NivelEdu = 'universitario' | 'graduada' | 'master' | 'doctorado';
+export type Sector = 'privado' | 'publico' | 'ong' | 'emprendimiento';
+export type Laboral = 'si' | 'no' | 'independiente';
+export type MetodoPago = 'transferencia' | 'paypal' | '';
+export type CuandoPagar = 'ahora' | 'despues' | '';
+
+export interface FormData {
+    // Datos personales
     nombre: string;
-    // Step 2
     pais: string;
     documento: string;
-    // Step 3
     email: string;
-    // Step 4
-    whatsapp: string;
-    codigoPais: string;
-    // Step 5
-    educacion: string;
-    sector: string;
-    laboral: string;
-    // Step 6
-    bootcampElegido: string;
-    // Step 7
+    waCode: string;      // ej. "+593"
+    waNumero: string;    // ej. "99 123 4567"
+
+    // Perfil
+    edu: NivelEdu | '';
+    laboral: Laboral | '';
+    sector: Sector | '';
+
+    // Bootcamp
+    bootcampElegido: NivelBootcamp | '';
+
+    // Motivación
     mot1: string;
     mot2: string;
-    // Step 8
-    fechaReunion: string;
+    recomendo: string;
+
+    // Agenda
+    fechaReunion: Date | null;
     horaReunion: string;
-    certificado: boolean;
-    privacidad: boolean;
+
+    // Pago
+    cuandoPagar: CuandoPagar;
+    metodoPago: MetodoPago;
+    comprobantePago?: string; // URL de Cloudinary para transferencia
+
+    // Privacidad
+    aceptaPrivacidad: boolean;
+
+    // Resultado (calculado al final)
+    bootcampRecomendado: NivelBootcamp | '';
+    razonRecomendacion: string;
+    meetLink?: string;
 }
 
-export type Level = 1 | 2 | 3;
-
-export interface Recommendation {
-    nivel: Level;
-    titulo: string;
-    razon: string;
-}
+export const FORM_INITIAL: FormData = {
+    nombre: '',
+    pais: '',
+    documento: '',
+    email: '',
+    waCode: '+593',
+    waNumero: '',
+    edu: '',
+    laboral: '',
+    sector: '',
+    bootcampElegido: '',
+    mot1: '',
+    mot2: '',
+    recomendo: '',
+    fechaReunion: null,
+    horaReunion: '',
+    cuandoPagar: '',
+    metodoPago: '',
+    aceptaPrivacidad: false,
+    bootcampRecomendado: '',
+    razonRecomendacion: ''
+};

@@ -1,21 +1,31 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Plus_Jakarta_Sans } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const libreBaskerville = Libre_Baskerville({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-libre-baskerville",
+  weight: ["300", "400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta",
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-body",
 });
 
 export const metadata: Metadata = {
-  title: "Zaros Bootcamp Postulación",
-  description: "Transforma tu liderazgo. Postula al Bootcamp Zaros.",
+  title: "Zaros Latam – Programa Intensivo Internacional",
+  description:
+    "El programa de liderazgo estratégico femenino más transformador de América Latina. Método 3C validado con +200 mujeres. Plazas limitadas.",
+  keywords:
+    "liderazgo femenino, programa intensivo, método 3C, Zaros Latam, América Latina",
+  openGraph: {
+    title: "Zaros Latam – Programa Intensivo Internacional",
+    description: "No es un curso. Es transformación estructurada.",
+    url: "https://zaros-latam.vercel.app",
+  },
 };
 
 export default function RootLayout({
@@ -25,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${libreBaskerville.variable} ${plusJakartaSans.variable}`}>
+      <body className={`${cormorant.variable} ${dmSans.variable}`}>
         {children}
       </body>
     </html>

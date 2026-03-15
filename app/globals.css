@@ -1,13 +1,42 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF7F2;
+  --color-plum: #3B1260;
+  --color-violet: #6C3BA5;
+  --color-rose: #C8447A;
+  --color-text1: #1E0E35;
+  --color-text2: #5A4870;
+  --color-text3: #9B8EB0;
+  --color-borderlight: #DDD4E8;
+  --color-plum2: #2A0D46;
+  --color-gold: #B8924A;
+  --color-gold-l: #D4AF6B;
+  --font-sans: var(--font-body), sans-serif;
+  --font-serif: var(--font-display), serif;
+}
 
 @layer base {
   body {
-    @apply bg-cream text-text1 font-sans antialiased selection:bg-rose selection:text-white;
+    background-color: var(--color-cream);
+    color: var(--color-text1);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-plum;
+  ::selection {
+    background-color: var(--color-rose);
+    color: white;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+    color: var(--color-plum);
   }
 }
