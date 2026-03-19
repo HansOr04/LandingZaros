@@ -32,9 +32,9 @@ export const StepAnalisis = () => {
             });
         }, 900);
 
-        // 3. Move to Step 10 automatically after 4800ms
+        // 3. Move to Step 9 (resultado/decisión) automatically after 4800ms
         const finishTimeout = setTimeout(() => {
-            goToStep(10);
+            goToStep(9);
         }, 4800);
 
         return () => {

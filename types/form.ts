@@ -4,6 +4,7 @@ export type Sector = 'privado' | 'publico' | 'ong' | 'emprendimiento';
 export type Laboral = 'si' | 'no' | 'independiente';
 export type MetodoPago = 'transferencia' | 'paypal' | '';
 export type CuandoPagar = 'ahora' | 'despues' | '';
+export type DecisionPath = 'pagar' | 'agendar' | '';
 
 export interface FormData {
     // Datos personales
@@ -26,6 +27,9 @@ export interface FormData {
     mot1: string;
     mot2: string;
     recomendo: string;
+
+    // Decisión post-análisis
+    decisionPath: DecisionPath;
 
     // Agenda
     fechaReunion: Date | null;
@@ -59,6 +63,7 @@ export const FORM_INITIAL: FormData = {
     mot1: '',
     mot2: '',
     recomendo: '',
+    decisionPath: '',
     fechaReunion: null,
     horaReunion: '',
     cuandoPagar: '',

@@ -7,19 +7,18 @@ import { Check } from "lucide-react";
 export const Stepper = () => {
     const { step } = useForm();
 
-    // Maps actual form steps (1-10) to visual circles (1-6)
+    // Maps actual form steps (1-12) to visual circles (1-5)
     const getActiveCircle = () => {
         if (step >= 1 && step <= 4) return 1; // Datos
-        if (step === 5) return 2; // Perfil
-        if (step === 6) return 3; // Bootcamp
-        if (step === 7) return 4; // Motivacion
-        if (step === 8) return 5; // Agenda
-        return 6; // Resultado (Steps 9-10)
+        if (step === 5) return 2;             // Perfil
+        if (step === 6) return 3;             // Programa
+        if (step === 7) return 4;             // Motivación
+        return 5;                             // Resultado (Steps 8+, stepper hidden)
     };
 
     const activeCircle = getActiveCircle();
-    const totalSteps = 6;
-    const labels = ["Datos", "Perfil", "Programa", "Motivación", "Agenda", "Resultado"];
+    const totalSteps = 5;
+    const labels = ["Datos", "Perfil", "Programa", "Motivación", "Análisis"];
 
     return (
         <div className="w-full max-w-2xl mx-auto px-4 py-8">
@@ -50,7 +49,7 @@ export const Stepper = () => {
                                         "border-[#DDD4E8] bg-white text-[#9B8EB0]"
                                     }`}
                             >
-                                {stepNum === 6 ? "✦" : (isDone ? <Check size={18} strokeWidth={3} /> : stepNum)}
+                                {stepNum === 5 ? "✦" : (isDone ? <Check size={18} strokeWidth={3} /> : stepNum)}
                             </div>
                             <div className={`mt-2 text-[10px] md:text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${isActive ? "text-[#C8447A]" : isDone ? "text-[#3B1260]" : "text-[#9B8EB0]"
                                 }`}>

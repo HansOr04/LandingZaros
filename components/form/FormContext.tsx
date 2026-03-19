@@ -5,7 +5,7 @@ import { FormData, FORM_INITIAL } from "@/types/form";
 interface FormContextType {
     data: FormData;
     setField: <K extends keyof FormData>(key: K, value: FormData[K]) => void;
-    step: number;          // paso actual (1-10)
+    step: number;
     next: () => void;
     back: () => void;
     goToStep: (n: number) => void;
@@ -25,12 +25,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
 
     const next = () => {
         setDirection('forward');
-        setStep(prev => Math.min(prev + 1, 10));
-
-        if (step === 8) {
-            // Simulate going to step 9 then firing submit logic
-            goToStep(9);
-        }
+        setStep(prev => Math.min(prev + 1, 12));
     };
 
     const back = () => {
@@ -41,8 +36,9 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
     const goToStep = async (n: number) => {
         setDirection(n > step ? 'forward' : 'backward');
         setStep(n);
-        // Disparar api call en background
-        if (n === 9) {
+
+        // Submit when reaching confirmation (step 12) — fire in background
+        if (n === 12) {
             try {
                 const res = await fetch('/api/submit', {
                     method: 'POST',
@@ -50,7 +46,6 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
                     body: JSON.stringify(data)
                 });
                 const json = await res.json();
-
                 if (json.meetLink) {
                     setField('meetLink', json.meetLink);
                 }

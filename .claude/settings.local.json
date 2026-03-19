@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"d:/zule/zaros-bootcamp-form/components/form/steps/StepPago.tsx\":*)"
+    ]
+  }
+}

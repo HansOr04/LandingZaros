@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 interface PaymentSectionProps {
     data: FormData;
     setField: <K extends keyof FormData>(key: K, value: FormData[K]) => void;
+    hideTiming?: boolean; // cuando true, omite el bloque "¿Cuándo pagar?" y va directo al método
 }
 
 const PAYPAL_LINKS: Record<string, string> = {
@@ -36,12 +37,14 @@ const isEcuadorian = (pais: string): boolean => {
     return pais.toLowerCase() === 'ecuador';
 };
 
-export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
+export const PaymentSection = ({ data, setField, hideTiming = false }: PaymentSectionProps) => {
     const [uploadingFile, setUploadingFile] = useState(false);
     const [uploadError, setUploadError] = useState('');
     const ecuadorian = isEcuadorian(data.pais);
     const bootcamp = data.bootcampElegido as string;
     const paypalLink = PAYPAL_LINKS[bootcamp] || PAYPAL_LINKS['nivel1'];
+    // Si hideTiming, el usuario ya eligió pagar → tratarlo como cuandoPagar='ahora'
+    const pagarAhora = hideTiming || data.cuandoPagar === 'ahora';
 
     const handleFileUpload = async (file: File) => {
         if (!file.type.startsWith('image/')) {
@@ -54,11 +57,9 @@ export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'zaros_bootcamp');
 
         try {
-            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dlvxbk47p';
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -91,8 +92,8 @@ export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
                 💳 Método de Pago
             </h3>
 
-            {/* Para ecuatorianos: opción de cuándo pagar */}
-            {ecuadorian && (
+            {/* Para ecuatorianos: opción de cuándo pagar — oculta si hideTiming */}
+            {ecuadorian && !hideTiming && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -140,7 +141,7 @@ export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
             )}
 
             {/* Métodos de pago */}
-            {(!ecuadorian || data.cuandoPagar === 'ahora') && (
+            {(!ecuadorian || pagarAhora) && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -226,33 +227,98 @@ export const PaymentSection = ({ data, setField }: PaymentSectionProps) => {
                 </motion.div>
             )}
 
-            {/* PayPal Button / Link */}
-            {data.metodoPago === 'paypal' && (!ecuadorian || data.cuandoPagar === 'ahora') && (
+            {/* PayPal Button / Link + captura */}
+            {data.metodoPago === 'paypal' && (!ecuadorian || pagarAhora) && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-[#FDB750]/10 to-[#FDB750]/5 border border-[#FDB750]/30 rounded-[16px] p-6"
+                    className="space-y-4"
                 >
-                    <p className="text-[0.85rem] text-[#5A4870] mb-4">
-                        Haz clic en el botón de abajo para abrir PayPal de forma segura:
-                    </p>
-                    <a
-                        href={paypalLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#0070BA] text-white font-bold rounded-[12px] hover:bg-[#005EA6] transition-colors text-[0.95rem]"
+                    <div className="bg-gradient-to-br from-[#FDB750]/10 to-[#FDB750]/5 border border-[#FDB750]/30 rounded-[16px] p-6">
+                        <p className="text-[0.85rem] text-[#5A4870] mb-4">
+                            Haz clic en el botón de abajo para abrir PayPal de forma segura:
+                        </p>
+                        <a
+                            href={paypalLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#0070BA] text-white font-bold rounded-[12px] hover:bg-[#005EA6] transition-colors text-[0.95rem]"
+                        >
+                            <span className="text-xl">🔗</span>
+                            {' Ir a PayPal'}
+                        </a>
+                        <p className="text-[0.75rem] text-[#9B8EB0] mt-3 text-center">
+                            Se abrirá en una nueva ventana. Vuelve aquí después de completar el pago.
+                        </p>
+                    </div>
+
+                    {/* Upload captura PayPal */}
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        onDrop={handleDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                document.getElementById('paypal-proof')?.click();
+                            }
+                        }}
+                        className={`border-2 border-dashed rounded-[14px] p-6 text-center transition-all cursor-pointer ${
+                            uploadingFile
+                                ? 'border-[#0070BA] bg-[#0070BA]/5'
+                                : 'border-[#DDD4E8] bg-[#F7F9FF] hover:border-[#0070BA] hover:bg-[#0070BA]/[0.02]'
+                        }`}
                     >
-                        <span className="text-xl">🔗</span>
-                        {' Ir a PayPal'}
-                    </a>
-                    <p className="text-[0.75rem] text-[#9B8EB0] mt-3 text-center">
-                        Se abrirá en una nueva ventana. Vuelve aquí después de completar el pago.
-                    </p>
+                        <input
+                            type="file"
+                            id="paypal-proof"
+                            accept="image/*"
+                            onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
+                            disabled={uploadingFile}
+                            className="hidden"
+                        />
+                        {uploadingFile && (
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0070BA]"></div>
+                                <p className="text-[#5A4870] font-semibold text-[0.9rem]">Subiendo...</p>
+                            </div>
+                        )}
+                        {!uploadingFile && data.comprobantePago && (
+                            <div className="flex flex-col items-center gap-3">
+                                <span className="text-3xl">✅</span>
+                                <p className="font-bold text-[#1E0E35] text-[0.9rem]">Captura subida exitosamente</p>
+                                <p className="text-[#5A4870] text-[0.8rem]">Puedes cambiar la imagen si lo deseas</p>
+                                <label
+                                    htmlFor="paypal-proof"
+                                    className="mt-2 text-[#0070BA] font-semibold text-[0.85rem] cursor-pointer hover:underline"
+                                >
+                                    Cambiar imagen
+                                </label>
+                            </div>
+                        )}
+                        {!uploadingFile && !data.comprobantePago && (
+                            <label
+                                htmlFor="paypal-proof"
+                                className="flex flex-col items-center gap-3 cursor-pointer"
+                            >
+                                <span className="text-4xl">📸</span>
+                                <p className="font-bold text-[#1E0E35] text-[0.9rem]">Sube la captura de tu pago en PayPal</p>
+                                <p className="text-[#5A4870] text-[0.8rem]">Arrastra la imagen aquí o haz clic para seleccionar</p>
+                                <div className="mt-2 text-[0.75rem] text-[#9B8EB0]">PNG, JPG o JPEG · Máx 5MB</div>
+                            </label>
+                        )}
+                    </div>
+
+                    {uploadError && (
+                        <div className="bg-[#FDEAEA] border border-[#F5A5A5] text-[#C53F3F] rounded-[12px] p-3 text-[0.85rem]">
+                            {uploadError}
+                        </div>
+                    )}
                 </motion.div>
             )}
 
             {/* Información de Transferencia */}
-            {data.metodoPago === 'transferencia' && ecuadorian && data.cuandoPagar === 'ahora' && (
+            {data.metodoPago === 'transferencia' && ecuadorian && pagarAhora && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}

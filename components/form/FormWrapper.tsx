@@ -14,6 +14,8 @@ import { StepMotivacion } from './steps/StepMotivacion';
 import { StepAgenda } from './steps/StepAgenda';
 import { StepAnalisis } from './steps/StepAnalisis';
 import { StepResultado } from './steps/StepResultado';
+import { StepPago } from './steps/StepPago';
+import { StepConfirmacion } from './steps/StepConfirmacion';
 
 export const FormWrapper = () => {
     const { step, direction } = useForm();
@@ -27,9 +29,11 @@ export const FormWrapper = () => {
             case 5: return <StepPerfil />;
             case 6: return <StepPrograma />;
             case 7: return <StepMotivacion />;
-            case 8: return <StepAgenda />;
-            case 9: return <StepAnalisis />;
-            case 10: return <StepResultado />;
+            case 8: return <StepAnalisis />;
+            case 9: return <StepResultado />;
+            case 10: return <StepPago />;
+            case 11: return <StepAgenda />;
+            case 12: return <StepConfirmacion />;
             default:
                 return (
                     <div className="p-8 text-center text-[#5A4870]">
@@ -58,7 +62,7 @@ export const FormWrapper = () => {
     return (
         <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center">
             {/* Stepper takes upper space */}
-            {step < 9 && (
+            {step < 8 && (
                 <div className="w-full pt-8 pb-4 sticky top-0 bg-[#FAF7F2]/90 backdrop-blur z-50">
                     <Stepper />
                 </div>
